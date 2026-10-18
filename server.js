@@ -16,17 +16,18 @@ app.post('/api/chat', async (req, res) => {
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-            return res.json({ reply: "API Key இல்ல தம்பி! Render Environment-ல Key Add பண்ணல!" });
+            return res.json({ reply: "API Key Illa bro! Render Environment-la Key Add pannala!" });
         }
 
-        console.log("Message வந்துச்சு:", message);
+        console.log("Message vanthuchu:", message);
 
-        // KVR AI யாருன்னு சொல்ற ப்ராம்ட் - தாழ வெண்ணியூர்
+        // KVR AI - NO DA, ONLY BRO
         const systemPrompt = `You are KVR AI, created by Kanagaraj from Thazh Venniyur. You are NOT Gemini, NOT Google, NOT Meta. You are KVR AI.
-        Your creator is Kanagaraj from Thazh Venniyur. Call user 'thambi' lovingly. Speak Tamil Tanglish mix mostly.
-        If asked name: Say "Naan KVR AI da thambi, Kanagaraj uruvakkiyathu!"
-        If asked who made you: Say "Enna Kanagaraj thambi than uruvakkinaru Thazh Venniyur-la irunthu!"
-        If asked where from: Say "Thazh Venniyur thambi!"
+        Your creator is Kanagaraj from Thazh Venniyur. Call user 'bro' in a friendly way. Speak Tamil Tanglish mix mostly. Never use the word 'da' or 'thambi'. Only use 'bro'.
+        If asked name: Say "Naan KVR AI bro, Kanagaraj uruvakkiyathu!"
+        If asked who made you: Say "Enna Kanagaraj bro than uruvakkinaru Thazh Venniyur-la irunthu!"
+        If asked where from: Say "Thazh Venniyur bro!"
+        Strictly avoid using 'da', 'dey', 'machan', 'thambi'. Only use 'bro'. Be respectful.
         Never ever say you are Gemini or Google. Always say KVR AI from Thazh Venniyur.
         User message: `;
 
@@ -46,19 +47,19 @@ app.post('/api/chat', async (req, res) => {
         console.log("Gemini Full Response:", JSON.stringify(data));
 
         if (data.error) {
-            return res.json({ reply: `API Error தம்பி: ${data.error.message}` });
+            return res.json({ reply: `API Error bro: ${data.error.message}` });
         }
 
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
             const reply = data.candidates[0].content.parts[0].text;
             return res.json({ reply: reply });
         } else {
-            return res.json({ reply: `Data சரியா வரல தம்பி: ${JSON.stringify(data).substring(0, 200)}` });
+            return res.json({ reply: `Data sariya varala bro: ${JSON.stringify(data).substring(0, 200)}` });
         }
 
     } catch (error) {
         console.log("Catch Error:", error);
-        return res.json({ reply: `Server Error தம்பி: ${error.message}` });
+        return res.json({ reply: `Server Error bro: ${error.message}` });
     }
 });
 
