@@ -1,46 +1,52 @@
-require("dotenv").config({
-    path: __dirname + "/.env"
-});
-console.log(
-    "API Key loaded:",
-    Boolean(process.env.GEMINI_API_KEY)
-);
-const express = require("express");
-const path = require("path");
-const { GoogleGenAI } = require("@google/genai");
+require('dotenv').config({ path: __dirname + '/.env' });
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY
-});
-
-app.post("/api/chat", async (req, res) => {
+// Gemini API Chat Route
+app.post('/api/chat', async (req, res) => {
     try {
-        const message = req.body.message;
+        const { message } = req.body;
+        const apiKey = process.env.GEMINI_API_KEY;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-3.1-flash-lite",
-            contents: message
+        if (!apiKey) {
+            return res.status(500).json({ error: "API Key Illa" });
+        }
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: message }] }]
+            })
         });
 
-        res.json({
-            reply: response.text
-        });
+        const data = await response.json();
+
+        if (data.candidates && data.candidates[0]) {
+            res.json({ reply: data.candidates[0].content.parts[0].text });
+        } else {
+            res.json({ reply: "Ennakku puriyala thambi, thirumba kelu!" });
+        }
 
     } catch (error) {
-        console.error("Gemini error:", error.message);
-
-        res.status(500).json({
-            reply: "மன்னிக்கவும்! AI இணைப்பில் சிக்கல் ஏற்பட்டுள்ளது. மீண்டும் முயற்சி செய்யுங்கள்."
-        });
+        console.log(error);
+        res.status(500).json({ error: "Server Error" });
     }
 });
 
+// Website-a Kaamikira Route - Idhu thaan mukkiyam!
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(PORT, () => {
-    console.log("KVR AI running at http://localhost:3000");
+    console.log(`Server running on port ${PORT}`);
 });
