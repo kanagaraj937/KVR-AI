@@ -11,8 +11,7 @@ app.use(express.static(path.join(__dirname)));
 // MODELS LIST - Oru model busy na adutha model try pannum bro!
 const MODELS = [
     "gemini-1.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash-8b"
+    "gemini-1.5-pro"
 ];
 
 async function callGemini(prompt, imageBase64) {
