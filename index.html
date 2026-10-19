@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KVR AI - Voice Mass</title>
+    <title>KVR AI - Clear Voice</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -259,7 +259,7 @@
             margin-right: auto;
             border-bottom-left-radius: 6px;
             border: 1px solid #222;
-            padding-bottom: 34px
+            padding-bottom: 38px
         }
 
         .speak-btn {
@@ -269,7 +269,7 @@
             background: #222;
             border: 1px solid #333;
             color: #00ff88;
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 11px;
             cursor: pointer
@@ -404,7 +404,7 @@
         <div id="side-top"><button id="new-chat" onclick="newChat()">+ New Chat</button></div>
         <div id="history"></div>
         <div style="padding:12px;border-top:1px solid #1a1a1a">
-            <p style="font-size:10px;color:#444;text-align:center">KVR AI • Live Bro</p>
+            <p style="font-size:10px;color:#444;text-align:center">KVR AI • Clear Voice Bro</p>
         </div>
     </div>
     <div id="main">
@@ -413,7 +413,7 @@
             <div id="logo"><span>KVR</span></div>
             <div id="head-txt">
                 <h2>KVR AI</h2>
-                <p>Ask Anything Bro</p>
+                <p>Clear Voice Bro</p>
             </div>
             <button id="voice-toggle" onclick="toggleAutoVoice()">🔊 Voice: ON</button>
         </div>
@@ -421,9 +421,9 @@
             <div id="chat-inner">
                 <div id="welcome">
                     <h1>வணக்கம் ப்ரோ,<br><span>என்ன பண்ணலாம்?</span></h1>
-                    <p class="sub">Logo Mass • Photo Edit • Voice Pesum • History - Ellaam Ready Bro!</p>
+                    <p class="sub">Gemini Maathiri Clear Voice - Thiliva Pesum Bro!</p>
                     <div class="suggest">
-                        <div class="s-card" onclick="ask(this)">🔊 KVR AI Voice-la Pesu Bro</div>
+                        <div class="s-card" onclick="ask(this)">🔊 Clear Voice-la Pesu Bro</div>
                         <div class="s-card" onclick="ask(this)">🔥 KVR-nu Mass Logo Design pannu bro</div>
                         <div class="s-card" onclick="ask(this)">📸 Intha Photo-va Mass-a Edit pannu bro</div>
                         <div class="s-card" onclick="ask(this)">😂 Thazh Venniyur pathi Joke sollu bro</div>
@@ -438,12 +438,13 @@
             <div id="input-wrap">
                 <label class="icon" id="plus" for="fileIn" title="Photo Upload">+</label>
                 <input type="file" id="fileIn" hidden accept="image/*" onchange="handleImg(this)">
-                <textarea id="msg" rows="1" placeholder="KVR AI kitta edhuvum kelu bro... Voice-la pesum!"
+                <textarea id="msg" rows="1" placeholder="KVR AI kitta kelu bro... Gemini maathiri clear-a pesum!"
                     oninput="autoGrow(this)"></textarea>
                 <button class="icon" id="mic" onclick="toggleMic()" title="Mic">🎤</button>
                 <button class="icon" id="send" onclick="send()" title="Send">↑</button>
             </div>
-            <p style="text-align:center;color:#333;font-size:9px;margin-top:8px">KVR AI • Mass AI Bro</p>
+            <p style="text-align:center;color:#333;font-size:9px;margin-top:8px">KVR AI • Thazh Venniyur • Clear Voice
+            </p>
         </div>
     </div>
     <script>
@@ -473,17 +474,28 @@
             document.getElementById('voice-toggle').innerText = autoVoice ? '🔊 Voice: ON' : '🔇 Voice: OFF';
             if (!autoVoice) speechSynthesis.cancel();
         }
+        // GEMINI MAATHIRI CLEAR VOICE - FIXED BRO!
         function speakText(text, btn) {
             if (!('speechSynthesis' in window)) return;
             speechSynthesis.cancel();
-            const clean = text.replace(/\*\*/g, '').replace(/🔥|✅|📸|😂|🔊/g, '').slice(0, 400);
+            const clean = text.replace(/\*\*/g, '').replace(/[#*🔥✅📸😂🔊]/g, '').trim().slice(0, 600);
             const u = new SpeechSynthesisUtterance(clean);
-            u.lang = 'ta-IN'; u.rate = 0.95; u.pitch = 1;
+            // CLEAR GEMINI STYLE SETTINGS
+            u.lang = 'en-IN';
+            u.rate = 0.92;
+            u.pitch = 1.05;
+            u.volume = 1;
             const voices = speechSynthesis.getVoices();
-            const tamilVoice = voices.find(v => v.lang.includes('ta')) || voices.find(v => v.lang.includes('en-IN')) || voices[0];
-            if (tamilVoice) u.voice = tamilVoice;
-            if (btn) { btn.innerText = '⏹️'; u.onend = () => btn.innerText = '🔊 Pesu' }
-            u.onerror = () => { if (btn) btn.innerText = '🔊 Pesu' }
+            // Best clear voice
+            let bestVoice = voices.find(v => v.name.toLowerCase().includes('google') && v.lang.includes('en-IN')) ||
+                voices.find(v => v.name.toLowerCase().includes('google') && v.lang.includes('en-US')) ||
+                voices.find(v => v.name.includes('Natural') && v.lang.includes('en')) ||
+                voices.find(v => v.lang === 'en-IN') ||
+                voices.find(v => v.lang === 'en-US') ||
+                voices[0];
+            if (bestVoice) u.voice = bestVoice;
+            if (btn) { btn.innerText = '⏹️'; u.onend = () => btn.innerText = '🔊 Pesu Bro' }
+            u.onerror = () => { if (btn) btn.innerText = '🔊 Pesu Bro' }
             speechSynthesis.speak(u);
         }
         async function send() {
@@ -492,24 +504,24 @@
             const welcome = document.getElementById('welcome'); if (welcome) welcome.style.display = 'none';
             chatInner.innerHTML += `<div class="msg user">${text} ${base64Img ? '📸' : ''}</div>`;
             const id = Date.now();
-            chatInner.innerHTML += `<div class="msg ai" id="${id}">Yosikiren bro... ⏳<button class="speak-btn" onclick="speakText(document.getElementById('${id}').innerText, this)">🔊 Pesu</button></div>`;
+            chatInner.innerHTML += `<div class="msg ai" id="${id}">Yosikiren bro... ⏳<button class="speak-btn" onclick="speakText(document.getElementById('${id}').innerText, this)">🔊</button></div>`;
             document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
             input.value = ''; input.style.height = 'auto'; const tempImg = base64Img; removeImg();
             try {
                 const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, image: tempImg }) });
                 const data = await res.json();
                 const reply = data.reply;
-                document.getElementById(id).innerHTML = reply.replace(/\n/g, '<br>') + `<br><button class="speak-btn" onclick="speakText(\`${reply.replace(/`/g, '').replace(/\n/g, ' ')}\`, this)">🔊 Pesu Bro</button>`;
+                document.getElementById(id).innerHTML = reply.replace(/\n/g, '<br>') + `<br><button class="speak-btn" onclick="speakText(\`${reply.replace(/`/g, "").replace(/\n/g, ' ')}\`, this)">🔊 Pesu Bro</button>`;
                 let h = JSON.parse(localStorage.getItem('kvr_hist') || '[]'); h.push({ q: text }); if (h.length > 20) h.shift();
                 localStorage.setItem('kvr_hist', JSON.stringify(h)); loadHistory();
-                if (autoVoice) { setTimeout(() => speakText(reply, null), 300); }
+                if (autoVoice) { setTimeout(() => speakText(reply, null), 400); }
             } catch (e) { document.getElementById(id).innerText = 'Network Error bro!' }
             document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
         }
         function toggleMic() {
             if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { alert('Chrome-la open pannu bro!'); return }
             if (!recognition) {
-                const SR = window.SpeechRecognition || window.webkitSpeechRecognition; recognition = new SR(); recognition.lang = 'ta-IN';
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition; recognition = new SR(); recognition.lang = 'en-IN'; recognition.interimResults = false;
                 recognition.onresult = e => { document.getElementById('msg').value = e.results[0][0].transcript; send() };
                 recognition.onend = () => { isMic = false; document.getElementById('mic').style.background = '#2a2a2a' }
             }
@@ -518,6 +530,7 @@
         }
         document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } });
         window.speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices() };
+        setTimeout(() => { speechSynthesis.getVoices() }, 500);
     </script>
 </body>
 
