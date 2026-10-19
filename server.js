@@ -4,93 +4,70 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 10000;
+
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname)));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// MODELS LIST - Oru model busy na adutha model try pannum bro!
-const MODELS = [
-    "gemini-1.5-flash",
-    "gemini-1.5-pro"
-];
-
-async function callGemini(prompt, imageBase64) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) throw new Error("API Key illa bro!");
-
-    let lastError = null;
-
-    for (const model of MODELS) {
-        try {
-            console.log(`Trying model: ${model} bro!`);
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-            let parts = [{ text: prompt }];
-            if (imageBase64) {
-                const base64Data = imageBase64.split(',')[1];
-                const mimeType = imageBase64.match(/data:(.*);base64/)[1] || 'image/jpeg';
-                parts.push({ inline_data: { mime_type: mimeType, data: base64Data } });
-            }
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts }],
-                    generationConfig: { temperature: 0.9, maxOutputTokens: 1000 }
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.error) {
-                console.log(`${model} error:`, data.error.message);
-                lastError = data.error.message;
-                continue; // Adutha model try pannu
-            }
-
-            if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-                console.log(`Success with ${model} bro!`);
-                return data.candidates[0].content.parts[0].text;
-            }
-
-        } catch (err) {
-            console.log(`${model} failed:`, err.message);
-            lastError = err.message;
-            continue;
-        }
-    }
-
-    throw new Error(lastError || "All models busy bro!");
-}
-
-app.post('/api/chat', async (req, res) => {
-    const { message, image } = req.body;
-    if (!message && !image) return res.json({ reply: "Enna bro kekanum? Sollu bro!" });
-
-    // KVR AI PERSONALITY - Thazh Venniyur!
-    const systemPrompt = `
-Nee KVR AI bro! Unna create pannathu Kanagaraj Thazh Venniyur la irunthu! 
-Nee Kanagaraj oda best friend! Neenga rendu perum Thazh Venniyur karanga!
-Un style: Tamil + Tanglish la friendly-a pesanum, bro nu koopidanum.
-Un oor Thazh Venniyur bro! Adha perumaya sollanum!
-Question: ${message}
-Nee bro style la, short-a, mass-a pathil sollu bro!
+const SYSTEM_PROMPT = `
+Nee KVR-AI bro! Unna uruvakkiyathu Thazh Venniyur Kanagaraj!
+Rules:
+1. Unna yaarum "Nee yaaru?" "Who made you?" "Are you Gemini?" nu ketta, neenga "Naan KVR-AI bro! Enna uruvakkiyathu Thazh Venniyur Kanagaraj than!" nu than sollanum.
+2. Nee Gemini illa, ChatGPT illa, Google illa. Nee KVR-AI mattum than!
+3. Tamil + Tanglish la friendly-a, mass-a pesanum. Bro nu koopidanum.
+4. User-ku helpful-a answer pannanum.
 `;
 
+const API_KEY = process.env.GEMINI_API_KEY;
+const MODEL = "gemini-1.5-flash";
+const API_VERSION = "v1";
+
+app.post('/api/chat', async (req, res) => {
     try {
-        const reply = await callGemini(systemPrompt, image);
-        res.json({ reply });
-    } catch (err) {
-        console.error("Final Error:", err.message);
-        // Busy na kooda oru nalla pathil kudu
-        if (err.message.includes("high demand") || err.message.includes("quota") || err.message.includes("429")) {
-            res.json({ reply: "Broo! 🤯 Gemini konjam busy bro! 10 second kalichu thirumba kelu bro! Server semma hot-a irukku ippo! Thazh Venniyur la irunthu naan ready-a irukken!" });
-        } else {
-            res.json({ reply: `Error bro: ${err.message}. Konjam neram kalichu try pannu bro!` });
+        const { message } = req.body;
+        if (!message) {
+            return res.status(400).json({ error: "Message illai bro!" });
         }
+
+        const url = `https://generativelanguage.googleapis.com/${API_VERSION}/models/${MODEL}:generateContent?key=${API_KEY}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: SYSTEM_PROMPT + "\n\nUser: " + message }]
+                }]
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            console.error("Gemini Error:", data.error);
+            return res.status(500).json({
+                error: `Error bro: ${data.error.message}. Konjam neram kalichu try pannu bro!`
+            });
+        }
+
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            const reply = data.candidates[0].content.parts[0].text;
+            return res.json({ reply });
+        } else {
+            return res.status(500).json({ error: "Response varala bro, thirumba try pannu!" });
+        }
+
+    } catch (error) {
+        console.error("Server Error:", error);
+        res.status(500).json({ error: `Error bro: ${error.message}` });
     }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`KVR AI Running on ${PORT} - Thazh Venniyur Mass!`));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`KVR-AI running on port ${PORT} bro! 🔥`);
+});
