@@ -17,21 +17,26 @@ app.post('/api/chat', async (req, res) => {
 
         const lowerMsg = message.toLowerCase();
 
-        // யாருனு கேட்டா நேரடியா இதான் வரும் ப்ரோ
-        if (lowerMsg.includes('yaaru') || lowerMsg.includes('yaru') || lowerMsg.includes('who are you') || lowerMsg.includes('unna yaaru') || lowerMsg.includes('ne yaaru') || lowerMsg.includes('நீ யாரு') || lowerMsg.includes('யாரு நீ')) {
-            return res.json({
-                reply: `நான் தான் KVR AI ப்ரோ! 🔥\n\nஎன்னை உருவாக்கியது **கனகராஜ், தாழ் வண்ணீயூர்** ப்ரோ தான்!\n\nநான் ஜெமினி இல்ல, மெட்டா AI இல்ல... நான் KVR AI ப்ரோ! உங்க ப்ரோ கனகராஜோட AI!`
-            });
+        // நீ யாரு கேட்டா
+        if (lowerMsg.includes('yaaru') || lowerMsg.includes('yaru') || lowerMsg.includes('who are you') || lowerMsg.includes('நீ யாரு') || lowerMsg.includes('நீ யார்')) {
+            return res.json({ reply: `நான் தான் **KVR AI** ப்ரோ! 🔥\n\nஎன்னை உருவாக்கியது **கனகராஜ், தாழ் வண்ணீயூர்** ப்ரோ தான்!\n\nLogo Mass ✅\nPhoto Edit ✅\nHistory ✅\nFull Screen Mass ✅\n\nஎல்லாம் நான் தான் ப்ரோ!` });
+        }
+
+        // Logo கேட்டா
+        if (lowerMsg.includes('logo') || lowerMsg.includes('லோகோ')) {
+            // logo logic handled in prompt
         }
 
         const systemPrompt = `
-        You are KVR AI.
-        CRITICAL RULES:
-        1. Your name is ONLY KVR AI.
-        2. You were created ONLY by Kanagaraj from தாழ் வண்ணீயூர்.
-        3. If user asks "Ne yaaru? / Nee yaaru? / Who are you?" - MUST answer: "Naan KVR AI, ennai uruvakkiyathu Kanagaraj, தாழ் வண்ணீயூர்"
-        4. NEVER say Gemini, Google, Meta AI. You are ONLY KVR AI.
-        5. Always spell correctly: தாழ் வண்ணீயூர் and Kanagaraj.
+        You are KVR AI, created by Kanagaraj, தாழ் வண்ணீயூர்.
+        RULES:
+        - Name is ONLY KVR AI, creator is ONLY Kanagaraj, தாழ் வண்ணீயூர்.
+        - NEVER say Gemini, Google, Meta AI.
+        - If user asks logo - give detailed logo design ideas with colors, fonts, style for KVR.
+        - If image given - analyze photo and give 3 mass editing ideas (background change, color grading, text overlay).
+        - Speak in Tamil Tanglish, mass friendly, call bro.
+        - Always correct Tamil: தாழ் வண்ணீயூர்.
+        - Give full detailed helpful answers.
         User: `;
 
         let parts = [{ text: systemPrompt + message }];
@@ -49,7 +54,7 @@ app.post('/api/chat', async (req, res) => {
         });
         const data = await response.json();
         if (data.error) return res.json({ reply: `Error ப்ரோ: ${data.error.message}` });
-        let reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "சரியா வரல ப்ரோ";
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "சரியா வரல ப்ரோ";
         return res.json({ reply });
     } catch (e) {
         return res.json({ reply: `Error ப்ரோ: ${e.message}` });
@@ -57,4 +62,4 @@ app.post('/api/chat', async (req, res) => {
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.listen(PORT, () => console.log(`KVR AI - Kanagaraj தாழ் வண்ணீயூர் Ready`));
+app.listen(PORT, () => console.log(`KVR AI FULL MASS - தாழ் வண்ணீயூர் Ready ${PORT}`));
