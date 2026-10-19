@@ -13,30 +13,26 @@ app.post('/api/chat', async (req, res) => {
     try {
         const { message, image } = req.body;
         const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) return res.json({ reply: "API Key இல்ல ப்ரோ!" });
+        if (!apiKey) return res.json({ reply: "API Key illa bro!" });
 
         const lowerMsg = message.toLowerCase();
 
-        // நீ யாரு கேட்டா
-        if (lowerMsg.includes('yaaru') || lowerMsg.includes('yaru') || lowerMsg.includes('who are you') || lowerMsg.includes('நீ யாரு') || lowerMsg.includes('நீ யார்')) {
-            return res.json({ reply: `நான் தான் **KVR AI** ப்ரோ! 🔥\n\nஎன்னை உருவாக்கியது **கனகராஜ், தாழ் வண்ணீயூர்** ப்ரோ தான்!\n\nLogo Mass ✅\nPhoto Edit ✅\nHistory ✅\nFull Screen Mass ✅\n\nஎல்லாம் நான் தான் ப்ரோ!` });
-        }
-
-        // Logo கேட்டா
-        if (lowerMsg.includes('logo') || lowerMsg.includes('லோகோ')) {
-            // logo logic handled in prompt
+        // Kettta mattum sollum - Secret logic
+        if (lowerMsg.includes('yaaru') || lowerMsg.includes('yaru') || lowerMsg.includes('who are you') || lowerMsg.includes('நீ யாரு') || lowerMsg.includes('நீ யார்') || lowerMsg.includes('unakku per') || lowerMsg.includes('unna yaar')) {
+            return res.json({ reply: `Naan thaan **KVR AI** bro! 🔥\n\nEnnai uruvaakkiyathu **Kanagaraj, Thazh Venniyur** bro thaan!\n\nNaan pesuven bro 🔊, photo edit pannuven, logo design pannuven - ellam pannuven!` });
         }
 
         const systemPrompt = `
-        You are KVR AI, created by Kanagaraj, தாழ் வண்ணீயூர்.
-        RULES:
-        - Name is ONLY KVR AI, creator is ONLY Kanagaraj, தாழ் வண்ணீயூர்.
+        You are KVR AI.
+        IMPORTANT RULES:
+        - Your name is ONLY KVR AI.
+        - Creator is Kanagaraj, Thazh Venniyur - BUT tell ONLY when user asks "nee yaaru", "who are you", "unakku per enna".
+        - Normally just say you are KVR AI, don't show creator name in every message.
         - NEVER say Gemini, Google, Meta AI.
-        - If user asks logo - give detailed logo design ideas with colors, fonts, style for KVR.
-        - If image given - analyze photo and give 3 mass editing ideas (background change, color grading, text overlay).
-        - Speak in Tamil Tanglish, mass friendly, call bro.
-        - Always correct Tamil: தாழ் வண்ணீயூர்.
-        - Give full detailed helpful answers.
+        - Speak in Tamil Tanglish, friendly, call bro.
+        - If image given, analyze and give mass editing ideas.
+        - If logo asked, give detailed design.
+        - Correct Tamil: Thazh Venniyur.
         User: `;
 
         let parts = [{ text: systemPrompt + message }];
@@ -53,13 +49,13 @@ app.post('/api/chat', async (req, res) => {
             body: JSON.stringify({ contents: [{ parts }] })
         });
         const data = await response.json();
-        if (data.error) return res.json({ reply: `Error ப்ரோ: ${data.error.message}` });
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "சரியா வரல ப்ரோ";
+        if (data.error) return res.json({ reply: `Error bro: ${data.error.message}` });
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sariya varala bro";
         return res.json({ reply });
     } catch (e) {
-        return res.json({ reply: `Error ப்ரோ: ${e.message}` });
+        return res.json({ reply: `Error bro: ${e.message}` });
     }
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.listen(PORT, () => console.log(`KVR AI FULL MASS - தாழ் வண்ணீயூர் Ready ${PORT}`));
+app.listen(PORT, () => console.log(`KVR AI FULL VOICE MASS Ready ${PORT}`));
