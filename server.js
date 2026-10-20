@@ -9,52 +9,46 @@ app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/chat', async (req, res) => {
-  try {
-    // NEW Google SDK illa, direct REST call - entha model-um work aagum
-    const apiKey = process.env.GEMINI_API_KEY;
-    const userMessage = req.body.message;
+  const apiKey = process.env.GEMINI_API_KEY;
+  const userMsg = req.body.message;
 
-    const prompt = `You are KVR-AI, created by KANAGARAJ. If anyone asks who created you, who made you, unna yaaru uruvakkinathu, enna enna mathi - you MUST say "Enna Kanagaraj than uruvakkinaru bro! Naan KVR-AI". Speak in Tanglish friendly. User: ${userMessage}`;
+  const prompt = `You are KVR-AI created by KANAGARAJ. If user asks unna yaaru uruvakkinathu, who created you, enna enna mathi - MUST reply "Enna Kanagaraj than uruvakkinaru bro! Naan KVR-AI". Speak Tanglish friendly. User: ${userMsg}`;
 
-    // Latest model - 3.8-flash
-    const model = "gemini-2.5-flash"; // stable, if fail aana 3.8 try pannum
+  // 4 model list - onnu fail aana aduthathu try pannum
+  const models = [
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash-lite", 
+    "gemini-1.5-flash-8b",
+    "gemini-flash-latest"
+  ];
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
-    });
-
-    const data = await response.json();
-    
-    if(data.error){
-      // 2nd try with 3.8-flash
-      const url2 = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
-      const res2 = await fetch(url2, {
+  for (let model of models) {
+    try {
+      console.log(`Trying ${model}...`);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      
+      const r = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
       });
-      const data2 = await res2.json();
-      if(data2.error) throw new Error(data2.error.message);
-      return res.json({ reply: data2.candidates[0].content.parts[0].text });
+      
+      const d = await r.json();
+      
+      if (d.candidates && d.candidates[0]) {
+        const reply = d.candidates[0].content.parts[0].text;
+        console.log(`Success with ${model}`);
+        return res.json({ reply: reply });
+      }
+      console.log(`Failed ${model}:`, d.error?.message);
+    } catch (e) {
+      console.log(`Error ${model}:`, e.message);
     }
-
-    const reply = data.candidates[0].content.parts[0].text;
-    res.json({ reply: reply });
-
-  } catch (e) {
-    console.log(e.message);
-    res.json({ reply: "Error: " + e.message });
   }
+
+  res.json({ reply: "Bro server busy-ah irukku, 1 min kazhichu 'hi' nu thiruppi anuppu bro! Kanagaraj KVR-AI ready!" });
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.listen(10000, '0.0.0.0', () => console.log('KVR-AI LIVE by Kanagaraj'));
