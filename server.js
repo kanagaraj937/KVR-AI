@@ -2,52 +2,44 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
-const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const SYSTEM_PROMPT = `
-Nee KVR-AI bro! Unna uruvakkiyathu Thazh Venniyur Kanagaraj than!
-Yaravathu "Nee yaaru?" "Who made you?" "Are you Gemini?" nu ketta,
-"Naan KVR-AI bro! Enna uruvakkiyathu Thazh Venniyur Kanagaraj!" nu sollanum.
-Nee Gemini illa, ChatGPT illa. Nee KVR-AI mattum!
-Tamil + Tanglish la friendly-a pesanum.
-`;
-
-const API_KEY = process.env.GEMINI_API_KEY;
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
+// Gemini API Route (Example)
 app.post('/api/chat', async (req, res) => {
     try {
+        const { GoogleGenerativeAI } = require('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
         const { message } = req.body;
-        if (!message) return res.status(400).json({ error: "Message illai bro" });
-
-        // PUDHU MODEL - ithu than ippo work aagum bro!
-        const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash",
-            contents: SYSTEM_PROMPT + "\n\nUser: " + message
-        });
-
-        const reply = response.text;
-        res.json({ reply });
-
+        const result = await model.generateContent(message);
+        const response = await result.response;
+        res.json({ reply: response.text() });
     } catch (error) {
-        console.error("KVR Error:", error.message);
-        res.status(500).json({
-            error: `Error bro: ${error.message}. Konjam neram kalichu try pannu bro!`
-        });
+        console.error(error);
+        res.status(500).json({ error: "AI Error: " + error.message });
     }
 });
 
-app.get('/*', (req, res) => {
+// Test Route
+app.get('/api/test', (req, res) => {
+    res.json({ status: "KVR-AI is Running!" });
+});
+
+// --- FIXED FALLBACK ROUTE ---
+// ithu than mukkiyam bro - app.get('*') ku badhila app.use
+app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// --- FIXED PORT BINDING ---
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`KVR-AI running on port ${PORT}`);
 });
